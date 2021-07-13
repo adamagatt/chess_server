@@ -1,0 +1,12 @@
+[package]
+name = "chess_server"
+version = "0.1.0"
+authors = ["Adam Gatt <adam.gatt@live.com.au>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+diesel = { version = "1.4.7", features = ["sqlite"] }
+rocket = "0.5.0-rc.1"
+serde = "1.0.126"

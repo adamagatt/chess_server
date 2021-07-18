@@ -1,7 +1,10 @@
 #[macro_use] extern crate diesel;
+#[macro_use] extern crate rand;
 #[macro_use] extern crate rocket;
+#[macro_use] extern crate hash_ids;
 
 pub mod chess;
+mod game;
 mod render;
 mod storage;
 
@@ -17,11 +20,8 @@ fn index() -> String {
 
 #[post("/game")]
 fn create_new_game() -> String {
-    let board: chess::Board = chess::initial_board();
-    storage::op::write_board(board).map_or_else(
+    game::create_new_game().map_or_else(
         |err: storage::op::StorageError| err.to_string(),
-        |new_id: i32| -> String {
-            new_id.to_string()
-        }
+        |new_game_code: String| new_game_code
     )
 }

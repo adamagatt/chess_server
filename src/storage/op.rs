@@ -42,22 +42,27 @@ fn get_last_insert_rowid(conn: &diesel::SqliteConnection) -> Result<i32, Storage
     .map_err(StorageError::Query)
 }
 
-pub fn write_board(_board: Board) -> Result<i32, StorageError> {
+pub fn write_board(_board: Board, code: String) -> Result<String, StorageError> {
+    
+    let entry = models::Game {
+        id: None,
+        code: Some(&code),
+        state: None //Some(board)
+    };
 
     get_storage()
-    .and_then(|conn: diesel::SqliteConnection| {
-        conn.transaction(|| {
-            diesel::insert_into(models::games::table)
-                .values(&models::Game{id: None})
-                .execute(&conn)
-                .map_err(StorageError::Query)
-            .and_then(
-                |a: usize| if a > 0 {
-                    get_last_insert_rowid(&conn)
-                } else {
-                    Err(StorageError::Generic(String::from("New game wasn't inserted")))
-                }
-            )
-        })
-    })
+    .and_then(|conn: diesel::SqliteConnection|
+        diesel::insert_into(models::games::table)
+            .values(entry)
+            .execute(&conn)
+            .map_err(StorageError::Query)
+    ).and_then(
+        |inserts: usize| {
+            if inserts > 0 {
+                Ok(code)
+            } else {
+                Err(StorageError::Generic(String::from("Failed to create new game")))
+            }
+        }
+    )
 }

@@ -36,7 +36,7 @@ fn get_storage() -> Result<diesel::SqliteConnection, StorageError> {
     SqliteConnection::establish(DB_FILE).map_err(StorageError::Connection)
 }
 
-fn get_last_insert_rowid(conn: &diesel::SqliteConnection) -> Result<i32, StorageError>{
+fn get_last_insert_rowid(conn: &diesel::SqliteConnection) -> Result<i32, StorageError> {
     diesel::select(last_insert_rowid)
     .first(conn)
     .map_err(StorageError::Query)
@@ -44,9 +44,8 @@ fn get_last_insert_rowid(conn: &diesel::SqliteConnection) -> Result<i32, Storage
 
 pub fn write_board(_board: Board, code: String) -> Result<String, StorageError> {
     
-    let entry = models::Game {
-        id: None,
-        code: Some(&code),
+    let entry = models::NewGame {
+        code: &code.to_string(),
         state: None //Some(board)
     };
 
@@ -63,6 +62,18 @@ pub fn write_board(_board: Board, code: String) -> Result<String, StorageError> 
             } else {
                 Err(StorageError::Generic(String::from("Failed to create new game")))
             }
+        }
+    )
+}
+
+pub fn read_board(search_code: &str) -> Result<models::Game, StorageError> {
+    use models::games::dsl::*;
+
+    get_storage()
+    .and_then(|conn: diesel::SqliteConnection| {
+        games.filter(code.eq(search_code))
+            .first::<models::Game>(&conn)
+            .map_err(StorageError::Query)
         }
     )
 }

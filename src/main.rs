@@ -1,7 +1,5 @@
 #[macro_use] extern crate diesel;
-#[macro_use] extern crate rand;
 #[macro_use] extern crate rocket;
-#[macro_use] extern crate hash_ids;
 
 pub mod chess;
 mod game;
@@ -10,7 +8,11 @@ mod storage;
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![index, create_new_game])
+    rocket::build().mount("/", routes![
+        index,
+        create_new_game,
+        find_game_by_code
+    ])
 }
 
 #[get("/")]
@@ -23,5 +25,16 @@ fn create_new_game() -> String {
     game::create_new_game().map_or_else(
         |err: storage::op::StorageError| err.to_string(),
         |new_game_code: String| new_game_code
+    )
+}
+
+#[get("/game/<code>")]
+fn find_game_by_code(code: &str) -> String {
+    game::load(code)
+    .map_or_else(
+        |err: storage::op::StorageError| err.to_string(),
+        |found_game: storage::models::Game| {
+            found_game.code
+        }
     )
 }

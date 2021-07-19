@@ -2,14 +2,20 @@ table! {
     games {
         id -> Integer,
         code -> Text,
-        state -> Binary,
+        state -> Nullable<Binary>,
     }
 }
 
-// Only need to borrow the game code for the lifetime of the insert
 #[derive(Insertable)]
-pub struct Game<'a> {
-    pub id: Option<i32>,
-    pub code: Option<&'a String>,
+#[table_name="games"]
+pub struct NewGame<'a> {
+    pub code: &'a str,
+    pub state: Option<Vec<u8>>
+}
+
+#[derive(Queryable)]
+pub struct Game {
+    pub id: i32,
+    pub code: String,
     pub state: Option<Vec<u8>>
 }

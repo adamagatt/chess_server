@@ -77,3 +77,11 @@ pub fn read_board(search_code: &str) -> Result<models::Game, StorageError> {
         }
     )
 }
+
+pub fn board_to_binary(board: Board) -> Result<Vec<u8>, Box<bincode::ErrorKind>> {
+    bincode::serialize(&board)
+}
+
+pub fn binary_to_board(bytes: Vec<u8>) -> Result<Board, Box<bincode::ErrorKind>> {
+    bincode::deserialize(&bytes)
+}
